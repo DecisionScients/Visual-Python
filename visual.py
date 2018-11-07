@@ -54,7 +54,7 @@ def countplot(df,xvar, hue=None, title='Count Plot', add_counts=False):
             ax.text(p.get_x()+p.get_width()/2.,
                     height/2, text, fontsize=20, ha="center", color='white') 
     plt.tight_layout()
-    return(fig)
+    return(ax)
 # --------------------------------------------------------------------------- #
 #                                  BOXPLOT                                    #
 # --------------------------------------------------------------------------- #
@@ -67,7 +67,7 @@ def boxplot(df, xvar, yvar=None, title='Box Plot'):
     else:
         sns.boxplot(x=xvar, y=yvar, data=df, ax=ax).set_title(title)       
     plt.tight_layout()
-    return(fig)
+    return(ax)
 # --------------------------------------------------------------------------- #
 #                              SCATTERPLOT (SNS)                              #
 # --------------------------------------------------------------------------- #
@@ -78,15 +78,15 @@ def sns_scatterplot(df, xvar, yvar, target, title):
     sns.scatterplot(x=xvar, y=yvar, data=df, ax=ax, style=target,
                     hue=target).set_title(title)       
     plt.tight_layout()
-    return(fig)
+    return(ax)
 
 # --------------------------------------------------------------------------- #
 #                              SCATTERPLOT (PLT)                              #
 # --------------------------------------------------------------------------- #
 def plt_scatterplot(df, xvar, yvar, target, title):
-    fig = plt.scatter(df[xvar], df[yvar], c=target, cmap='viridis')    
+    ax = plt.scatter(df[xvar], df[yvar], c=target, cmap='viridis')    
     plt.tight_layout()
-    return(fig)
+    return(ax)
 
 # %%
 # --------------------------------------------------------------------------- #
@@ -98,7 +98,7 @@ def bar_plot(df, xvar, yvar, title):
     fig, ax = plt.subplots()
     sns.barplot(x=xvar, y=yvar, data=df, ax=ax, color='b').set_title(title)       
     plt.tight_layout()
-    return(fig)
+    return(ax)
 
 # --------------------------------------------------------------------------- #
 #                               REGRESSION LINE                               #
@@ -110,7 +110,7 @@ def regression_plot(df, xvar, yvar, title, ci=None):
     ax = sns.regplot(x=xvar, y=yvar, data=df, ci=ci, ax=ax)
     fig.suptitle(title)
     plt.tight_layout()
-    return(fig)
+    return(ax)
 
 # --------------------------------------------------------------------------- #
 #                               RESIDUALS PLOT                                #
@@ -122,7 +122,7 @@ def residuals_plot(df, xvar, yvar, title):
     ax = sns.residplot(x=xvar, y=yvar, data=df)
     fig.suptitle(title)
     plt.tight_layout()
-    return(fig)
+    return(ax)
 
 # --------------------------------------------------------------------------- #
 #                                 HISTOGRAM                                   #
@@ -132,7 +132,7 @@ def histogram(x, title):
     sns.set_palette("GnBu_d")
     fig, ax = plt.subplots()
     sns.distplot(x,bins=40, ax=ax, kde=False).set_title(title)    
-    return(fig)
+    return(ax)
 
 
 # --------------------------------------------------------------------------- #
@@ -157,7 +157,7 @@ def corrplot(df):
     # Draw the heatmap with the mask and correct aspect ratio
     sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0, ax=ax,
                 square=True, linewidths=.5, cbar_kws={"shrink": .5})
-    return(fig)
+    return(ax)
 
 # ============================================================================ #
 #                                CORRELATION                                   #
@@ -173,7 +173,7 @@ def correlation(df):
                 square=True, linewidths=.5, cbar_kws={"shrink": .5},
                 xticklabels=True, yticklabels=True)
     ax.set_title("Correlation between Variables")
-    return(fig)
+    return(ax)
 
 # ============================================================================ #
 #                                ASSOCIATION                                   #
@@ -199,7 +199,7 @@ def association(df):
                 square=True, linewidths=.5, cbar_kws={"shrink": .5},
                 xticklabels=True, yticklabels=True)
     ax.set_title("Cramer's V Association between Variables")
-    return(fig)
+    return(ax)
 
 # %%
 # ---------------------------------------------------------------------------- #
@@ -489,9 +489,9 @@ def multi_countplot(df, nrows=None, ncols=None, width=None, height=None,
                     height/2, text, fontsize=20, ha="center", color='white') 
     plt.tight_layout()
     if title:
-        fig.suptitle(title)
-        fig.subplots_adjust(top=.9)
-    return(fig)
+        ax.suptitle(title)
+        ax.subplots_adjust(top=.9)
+    return(ax)
 
 # --------------------------------------------------------------------------- #
 #                              MULTI-HISTOGRAM                                #
@@ -522,17 +522,17 @@ def multi_histogram(df: pd.DataFrame, nrows: int=None, ncols: int=None,
         height = plt.rcParams.get('figure.figsize')[1] 
     figsize = [width, height]       
 
-    fig, axes = plt.subplots(ncols = ncols, nrows=nrows, figsize=figsize)    
+    fig, ax = plt.subplots(ncols = ncols, nrows=nrows, figsize=figsize)    
     cols = df.columns
 
-    for ax, cols in zip(axes.flat, cols):
-        sns.distplot(a = df[cols], kde=True, ax=ax)
+    for axis, cols in zip(axes.flat, cols):
+        sns.distplot(a = df[cols], kde=True, ax=axis)
     plt.tight_layout()
     
     if title:
-        fig.suptitle(title)
-        fig.subplots_adjust(top=.9)
-    return(fig)
+        ax.suptitle(title)
+        ax.subplots_adjust(top=.9)
+    return(ax)
 #%%
 # --------------------------------------------------------------------------- #
 #                               MULTI-BOXPLOT                                 #
@@ -568,32 +568,32 @@ def multi_boxplot(df, groupby=None, nrows=None, ncols=None, hue=None,
         height = plt.rcParams.get('figure.figsize')[1] 
     figsize = [width, height]       
 
-    fig, axes = plt.subplots(ncols = ncols, nrows=nrows, figsize=figsize)
+    fig, ax = plt.subplots(ncols = ncols, nrows=nrows, figsize=figsize)
 
     # Render plots
-    for ax, col in zip(axes.flat, cols):
+    for axis, col in zip(axes.flat, cols):
         if horizontal:
-            sns.boxplot(x = col, y = groupby, data=df, ax=ax, hue=hue,
+            sns.boxplot(x = col, y = groupby, data=df, ax=axis, hue=hue,
                         notch=True)
             if hue is not None:
-                handles, _ = ax.get_legend_handles_labels()
-                ax.legend(handles, ["Female", "Male"])
-                ax.legend(loc=legend) 
+                handles, _ = axis.get_legend_handles_labels()
+                axis.legend(handles, ["Female", "Male"])
+                axis.legend(loc=legend) 
             if ylim is not None:
-                ax.set(xlim=(0,ylim))
+                axis.set(xlim=(0,ylim))
         else:
-            sns.boxplot(x = groupby, y = col, data=df, ax=ax, hue=hue,
+            sns.boxplot(x = groupby, y = col, data=df, ax=axis, hue=hue,
                         notch=True)
             if hue is not None:
-                handles, _ = ax.get_legend_handles_labels()
-                ax.legend(handles, ["Female", "Male"])
-                ax.legend(loc=legend) 
+                handles, _ = aaxisx.get_legend_handles_labels()
+                axis.legend(handles, ["Female", "Male"])
+                axis.legend(loc=legend) 
             if ylim is not None:
-                ax.set(ylim=(0,ylim))
+                axis.set(ylim=(0,ylim))
     plt.tight_layout()
     
     if title:
-        fig.suptitle(title)
-        fig.subplots_adjust(top=.9)
-    return(fig)
+        ax.suptitle(title)
+        ax.subplots_adjust(top=.9)
+    return(ax)
 
