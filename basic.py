@@ -1,8 +1,8 @@
 # =========================================================================== #
-#                                 VISUAL                                      #
+#                                 BASIC                                       #
 # =========================================================================== #
-'''Modules for creating scatterplots, histograms, barplots, and other 
-visualizations.'''
+'''Basic plots, e.g. countplots, barplots, boxplots, scatterplots and
+line plots'''
 
 # %%
 # --------------------------------------------------------------------------- #
@@ -19,6 +19,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.legend_handler import HandlerLine2D
 from matplotlib.pylab import rc, rcParams
+import statsmodels.api as sm
 import seaborn as sns
 import scipy
 from scipy import stats
@@ -29,13 +30,6 @@ import tabulate
 import warnings
 warnings.filterwarnings('ignore')
 
-
-# --------------------------------------------------------------------------- #
-#                           PRINT DATAFRAME                                   #
-# --------------------------------------------------------------------------- #
-def print_df(df, centered = True):
-    '''Pretty prints a data frame'''    
-    print(tabulate.tabulate(df, headers='keys', tablefmt='psql'))
 
 # --------------------------------------------------------------------------- #
 #                                COUNT_PLOT                                   #
@@ -101,6 +95,15 @@ def bar_plot(df, xvar, yvar, title):
     return(ax)
 
 # --------------------------------------------------------------------------- #
+#                                 QQ PLOT                                     #
+# --------------------------------------------------------------------------- #
+def qq_plot(x, title='QQ-Plot'):
+    fig, ax = plt.subplots()
+    ax = sm.qqplot(x)       
+    plt.tight_layout()
+    return(ax)
+
+# --------------------------------------------------------------------------- #
 #                               REGRESSION LINE                               #
 # --------------------------------------------------------------------------- #
 def regression_plot(df, xvar, yvar, title, ci=None):
@@ -108,7 +111,7 @@ def regression_plot(df, xvar, yvar, title, ci=None):
     sns.set_palette("GnBu_d")
     fig, ax = plt.subplots()
     ax = sns.regplot(x=xvar, y=yvar, data=df, ci=ci, ax=ax)
-    fig.suptitle(title)
+    ax.set_title(title)
     plt.tight_layout()
     return(ax)
 
@@ -120,7 +123,7 @@ def residuals_plot(df, xvar, yvar, title):
     sns.set_palette("GnBu_d")
     fig, ax = plt.subplots()
     ax = sns.residplot(x=xvar, y=yvar, data=df)
-    fig.suptitle(title)
+    ax.set_title(title)
     plt.tight_layout()
     return(ax)
 
@@ -423,20 +426,22 @@ def multiplot(df, title=None):
 
     # Designates sub plots and title
     cols = df.columns
-    fig, axes = plt.subplots(ncols = 6, nrows=len(cols), figsize=figsize)    
+    fig, ax = plt.subplots(ncols = 6, nrows=len(cols), figsize=figsize)    
 
     # Renders count plots for each subplot 
     for col in range(len(cols)):        
-        sns.distplot(a = df[cols[col]], ax=axes[col,0]).set_title("No Transformation")
-        sns.boxplot(x = df[cols[col]], ax=axes[col,1]).set_title("No Transformation")
-        sns.distplot(a = np.log(df[cols[col]]+1), ax=axes[col,2]).set_title("Log Transformation")
-        sns.boxplot(x = np.log(df[cols[col]]+1), ax=axes[col,3]).set_title("Log Transformation")
-        sns.distplot(a = df[cols[col]]**2, ax=axes[col,4]).set_title("Square Transformation")
-        sns.boxplot(x = df[cols[col]]**2, ax=axes[col,5]).set_title("Square Transformation")
+        sns.distplot(a = df[cols[col]], ax=ax[col,0]).set_title("No Transformation")
+        sns.boxplot(x = df[cols[col]], ax=ax[col,1]).set_title("No Transformation")
+        sns.distplot(a = np.log(df[cols[col]]+1), ax=ax[col,2]).set_title("Log Transformation")
+        sns.boxplot(x = np.log(df[cols[col]]+1), ax=ax[col,3]).set_title("Log Transformation")
+        sns.distplot(a = df[cols[col]]**2, ax=ax[col,4]).set_title("Square Transformation")
+        sns.boxplot(x = df[cols[col]]**2, ax=ax[col,5]).set_title("Square Transformation")
     plt.tight_layout()
     if title:
         fig.suptitle(title)
-        fig.subplots_adjust(top=.95)
+        fig.subplots_adjust(top=.9)
+    return(fig)
+ 
 
 # --------------------------------------------------------------------------- #
 #                              MULTI-COUNTPLOT                                #
@@ -489,9 +494,9 @@ def multi_countplot(df, nrows=None, ncols=None, width=None, height=None,
                     height/2, text, fontsize=20, ha="center", color='white') 
     plt.tight_layout()
     if title:
-        ax.suptitle(title)
-        ax.subplots_adjust(top=.9)
-    return(ax)
+        fig.suptitle(title)
+        fig.subplots_adjust(top=.9)
+    return(fig)
 
 # --------------------------------------------------------------------------- #
 #                              MULTI-HISTOGRAM                                #
@@ -530,9 +535,9 @@ def multi_histogram(df: pd.DataFrame, nrows: int=None, ncols: int=None,
     plt.tight_layout()
     
     if title:
-        ax.suptitle(title)
-        ax.subplots_adjust(top=.9)
-    return(ax)
+        fig.suptitle(title)
+        fig.subplots_adjust(top=.9)
+    return(fig)
 #%%
 # --------------------------------------------------------------------------- #
 #                               MULTI-BOXPLOT                                 #
@@ -571,7 +576,7 @@ def multi_boxplot(df, groupby=None, nrows=None, ncols=None, hue=None,
     fig, ax = plt.subplots(ncols = ncols, nrows=nrows, figsize=figsize)
 
     # Render plots
-    for axis, col in zip(axes.flat, cols):
+    for axis, col in zip(ax.flat, cols):
         if horizontal:
             sns.boxplot(x = col, y = groupby, data=df, ax=axis, hue=hue,
                         notch=True)
@@ -585,7 +590,7 @@ def multi_boxplot(df, groupby=None, nrows=None, ncols=None, hue=None,
             sns.boxplot(x = groupby, y = col, data=df, ax=axis, hue=hue,
                         notch=True)
             if hue is not None:
-                handles, _ = aaxisx.get_legend_handles_labels()
+                handles, _ = axis.get_legend_handles_labels()
                 axis.legend(handles, ["Female", "Male"])
                 axis.legend(loc=legend) 
             if ylim is not None:
@@ -593,7 +598,7 @@ def multi_boxplot(df, groupby=None, nrows=None, ncols=None, hue=None,
     plt.tight_layout()
     
     if title:
-        ax.suptitle(title)
-        ax.subplots_adjust(top=.9)
-    return(ax)
+        fig.suptitle(title)
+        fig.subplots_adjust(top=.9)
+    return(fig)
 
