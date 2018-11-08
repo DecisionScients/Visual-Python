@@ -103,7 +103,7 @@ def qual_qual(df, x, y, title=None):
     # Renders count plots for each subplot 
     sns.barplot(x=x, y='counts', hue=y, data=df, ax=ax[0])
     ax[0].set_title('Bar Plot of ' + x + ' by ' + y)
-    mosaic(df[[x,y]], title='Mosaic Plot of ' + x + ' by ' + y, ax=ax[1], index=[x,y])
+    ax[1] = correlation.association(df[[x,y]]).set_title('Association between ' + x + ' and ' + y)
   
     plt.tight_layout()
     if title:
