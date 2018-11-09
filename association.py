@@ -40,12 +40,13 @@ def assoc_plot(df):
 
     mask = np.zeros_like(assoc, dtype=np.bool)
     mask[np.triu_indices_from(mask)] = True
-    fig, ax = plt.subplots(figsize=(11, 9))
+
+    fig, ax = plt.subplots()
     cmap = sns.diverging_palette(220, 10, as_cmap=True)
-    sns.heatmap(assoc, mask=mask, ax=ax, cmap=cmap, vmax=.3, center=0,
-                square=True, linewidths=.5, cbar_kws={"shrink": .5},
-                xticklabels=True, yticklabels=True)
-    ax.set_title("Cramer's V Association between Variables")
+    ax = sns.heatmap(assoc, mask=mask, cmap=cmap, vmax=.3, center=0,
+                     square=True, linewidths=.5, cbar_kws={"shrink": .5},
+                     xticklabels=True, yticklabels=True)
+    ax.set_title("Cramer's V Association Between Variables")
     return(ax)
 
 # %%

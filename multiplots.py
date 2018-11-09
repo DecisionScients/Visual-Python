@@ -7,29 +7,16 @@
 # --------------------------------------------------------------------------- #
 #                                 LIBRARIES                                   #
 # --------------------------------------------------------------------------- #
-import collections
-from collections import OrderedDict
-import itertools
-from itertools import combinations
-from itertools import product
 import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.legend_handler import HandlerLine2D
 from matplotlib.pylab import rc, rcParams
 import seaborn as sns
-import scipy
-from scipy import stats
-from scipy.stats import kurtosis, skew
-from sklearn import preprocessing
-import statistics as stat
-from  statsmodels.graphics.mosaicplot import mosaic
-import tabulate
-import warnings
-warnings.filterwarnings('ignore')
 
 import data
+import association
+import correlation
 #%%
 # --------------------------------------------------------------------------- #
 #                             QUANT_QUANT                                     #
@@ -56,7 +43,7 @@ def quant_quant(df, x, y, title=None):
     figsize = [width, height]       
 
     # Designates sub plots and title
-    fig, ax = plt.subplots(nrows = 1, ncols=2, figsize=figsize)   
+    fig, ax = plt.subplots(nrows = 1, ncols=3, figsize=figsize)   
 
     # Obtain count and category data    
     df = df.groupby([x,y]).size().reset_index(name='counts')
@@ -64,6 +51,7 @@ def quant_quant(df, x, y, title=None):
     # Renders count plots for each subplot 
     sns.scatterplot(x=x, y=y, data=df, ax=ax[0]).set_title('Scatter Plot of ' + x + ' and ' + y)
     sns.boxplot(data=df[[x,y]], ax=ax[1]).set_title('Box Plot of ' + x + ' and ' + y)
+    ax[2] = correlation.corr_plot(df[x,y]).set_title('Correlation Between ' + x + ' and ' + y)
   
     plt.tight_layout()
     if title:
@@ -95,15 +83,15 @@ def qual_qual(df, x, y, title=None):
     figsize = [width, height]       
 
     # Designates sub plots and title
-    fig, ax = plt.subplots(nrows = 1, ncols=2, figsize=figsize)   
+    fig, ax = plt.subplots(nrows = 1, ncols=1, figsize=figsize)   
 
     # Obtain count and category data    
     df = df.groupby([x,y]).size().reset_index(name='counts')
     
     # Renders count plots for each subplot 
-    sns.barplot(x=x, y='counts', hue=y, data=df, ax=ax[0])
-    ax[0].set_title('Bar Plot of ' + x + ' by ' + y)
-    ax[1] = correlation.association(df[[x,y]]).set_title('Association between ' + x + ' and ' + y)
+    sns.barplot(x=x, y='counts', hue=y, data=df, ax=ax)
+    ax.set_title('Bar Plot of ' + x + ' by ' + y)
+    association.assoc_plot(df[[x,y]]).set_title('Association Between ' + x + ' and ' + y)
   
     plt.tight_layout()
     if title:

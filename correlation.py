@@ -1,7 +1,7 @@
 # =========================================================================== #
 #                                 VISUAL                                      #
 # =========================================================================== #
-'''Modules for creating scatterplots, histograms, barplots, and other 
+'''Modules for creating scatterplots, histograms, barplots, and other
 visualizations.'''
 
 # %%
@@ -21,6 +21,7 @@ import seaborn as sns
 import scipy
 from scipy import stats
 
+import data
 # ---------------------------------------------------------------------------- #
 #                                CORR_PLOT                                     #
 # ---------------------------------------------------------------------------- #
@@ -44,13 +45,14 @@ def corr_plot(df):
     ax.set_title("Correlation between Variables")
     return(ax)
 
+# %%
 # ---------------------------------------------------------------------------- #
 #                                CORR_TABLE                                    #
 # ---------------------------------------------------------------------------- #
 
 
 def corr_table(df, x=None, y=None, target=None, threshold=0):
-    '''For a dataframe containing numeric variables, this function 
+    '''For a dataframe containing numeric variables, this function
     computes pairwise pearson's R tests of correlation correlation.
 
     Args:
@@ -65,15 +67,18 @@ def corr_table(df, x=None, y=None, target=None, threshold=0):
     tests = []
     if x is not None:
         for pair in list(itertools.product(x, y)):
-            r = stats.pearsonr(df[pair[0]], df[pair[1]])
+            df2 = df[[pair[0], pair[1]]].dropna()
+            x = df2[pair[0]]
+            y = df2[pair[1]]
+            r = stats.pearsonr(x, y)
             tests.append(OrderedDict(
                 {'x': pair[0], 'y': pair[1], "Correlation": r[0], "p-value": r[1]}))
         tests = pd.DataFrame(tests)
         tests['AbsCorr'] = tests['Correlation'].abs()
-        tests['Strength'] = np.where(tests["AbsCorr"] < .25, 'Extremely Weak',
-                                     np.where(tests["AbsCorr"] < .35, 'Weak',
-                                              np.where(tests["AbsCorr"] < .4, 'Moderate',
-                                                       'Strong')))
+        tests['Strength'] = np.where(tests["AbsCorr"] < .1, 'Extremely Weak Correlation',
+                                     np.where(tests["AbsCorr"] < .30, 'Small Correlation',
+                                              np.where(tests["AbsCorr"] < .5, 'Moderate Correlation',
+                                                       'Strong Correlation')))
         top = tests.loc[tests['AbsCorr'] > threshold]
         return top
     else:
@@ -83,6 +88,7 @@ def corr_table(df, x=None, y=None, target=None, threshold=0):
             if target not in df2.columns:
                 df2 = df2.join(df[target])
             for term in terms:
+                df2 = df2.dropna()
                 x = df2[term]
                 y = df2[target]
                 r = stats.pearsonr(x, y)
@@ -90,10 +96,15 @@ def corr_table(df, x=None, y=None, target=None, threshold=0):
                     {'x': term, 'y': target, "Correlation": r[0], "p-value": r[1]}))
             tests = pd.DataFrame(tests)
             tests['AbsCorr'] = tests['Correlation'].abs()
+            tests['Strength'] = np.where(tests["AbsCorr"] < .1, 'Extremely Weak Correlation',
+                                         np.where(tests["AbsCorr"] < .30, 'Small Correlation',
+                                                  np.where(tests["AbsCorr"] < .5, 'Moderate Correlation',
+                                                           'Strong Correlation')))
             top = tests.loc[tests['AbsCorr'] > threshold]
             return top
         else:
             for pair in list(combinations(terms, 2)):
+                df2 = df[[pair[0], pair[1]]].dropna()
                 x = df2[pair[0]]
                 y = df2[pair[1]]
                 r = stats.pearsonr(x, y)
@@ -101,9 +112,9 @@ def corr_table(df, x=None, y=None, target=None, threshold=0):
                     {'x': pair[0], 'y': pair[1], "Correlation": r[0], "p-value": r[1]}))
             tests = pd.DataFrame(tests)
             tests['AbsCorr'] = tests['Correlation'].abs()
-            tests['Strength'] = np.where(tests["AbsCorr"] < .25, 'Extremely Weak',
-                                         np.where(tests["AbsCorr"] < .35, 'Weak',
-                                                  np.where(tests["AbsCorr"] < .4, 'Moderate',
-                                                           'Strong')))
+            tests['Strength'] = np.where(tests["AbsCorr"] < .1, 'Extremely Weak Correlation',
+                                         np.where(tests["AbsCorr"] < .30, 'Small Correlation',
+                                                  np.where(tests["AbsCorr"] < .5, 'Moderate Correlation',
+                                                           'Strong Correlation')))
             top = tests.loc[tests['AbsCorr'] > threshold]
             return top
